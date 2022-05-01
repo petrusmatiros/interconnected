@@ -26,12 +26,14 @@ Mindmap over the game design of ``Interconnected``
 
 ## Installation & setup
 
-TBD
+1. Begin with installing the python package ``pygame`` via the file ``requirements.txt``
 
-1. Begin with installing the python package ``pygame``
+        pip install -r requirements.txt
+2. Run the game from [Main](src/Main.py)
 
-        pip install pygame
-2. Run the game from ![](src/main.py)
+        python Main.py
+
+3. Enjoy ^-^
   
 
 ## Game description & objective
