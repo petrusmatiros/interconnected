@@ -55,7 +55,8 @@ Mindmap over the game design of ``Interconnected``
 
 #### Game
 
-``P`` - pause <br>
+``N`` - toggle sfx <br>
+``M`` - toggle music <br>
 ``H`` - help <br>
 
 ## Assets
@@ -68,7 +69,9 @@ Mindmap over the game design of ``Interconnected``
 
 **GUI ([Pixel Art GUI Elements](https://mounirtohami.itch.io/pixel-art-gui-elements))** <br> Mounir Tohami
 
-**Pixel art ([Libresprite](https://libresprite.github.io/))** <br> Petrus Matiros
+**Pixel art ([Libresprite](https://libresprite.github.io/) & Photoshop)** <br> Petrus Matiros
+
+**Textures (Photoshop & [Tiled](https://www.mapeditor.org/))** <br> Petrus Matiros
 
 **Background splash art ([Space background generator](https://deep-fold.itch.io/space-background-generator))** <br> Deep-Fold
 
