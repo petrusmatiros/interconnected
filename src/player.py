@@ -9,7 +9,7 @@ class Player(Entity):
 	Args:
 		Entity (Entity): entity object of class Entity
 	"""
-	def __init__(self, init_position, groups, obstacle_sprites):
+	def __init__(self, init_position, location, groups, obstacle_sprites):
 		"""Initializes the player object
 
 		Args:
@@ -17,7 +17,7 @@ class Player(Entity):
 			groups (pygame.sprite): the visible sprites on the map
 			obstacle_sprites (pygame.sprite): the obsctacles on the map
 		"""
-		super().__init__(groups)
+		super().__init__(groups, location)
 		self.currentPosition = init_position
 		# display player and set it's hitbox
 		self.image = pygame.image.load('../assets/sprites/player/down/down_0.png').convert_alpha()

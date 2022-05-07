@@ -6,7 +6,7 @@ class Entity(pygame.sprite.Sprite):
 	"""
 	Entity is the base class for all entities.
 	"""
-	def __init__(self, groups):
+	def __init__(self, groups, location):
 		"""Initializes the entity.
 		"""
 		super().__init__(groups)
@@ -16,7 +16,9 @@ class Entity(pygame.sprite.Sprite):
 		self.animation_speed = 0.15
 		# the direction the sprite
 		self.direction = pygame.math.Vector2()
-		self.location = 'motherboard'
+		# the location of the sprite
+		self.location = location
+		# if the sprite is colliding with an obstacle
 		self.colliding = False
 		
   
