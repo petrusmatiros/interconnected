@@ -1,4 +1,5 @@
 from inspect import CO_ASYNC_GENERATOR
+from secrets import choice
 from traceback import print_stack
 import pygame 
 from config import *
@@ -45,9 +46,9 @@ class Room:
 		self.visible_sprites = Camera()
 		self.obstacle_sprites = pygame.sprite.Group()
 		# sprite setup
-		self.create_map(Collider_type.MOTHERBOARD.value)
+		self.create_map(Collider_type.MOTHERBOARD.value, 'both', 'motherboard')
 
-	def create_map(self, current_room):
+	def create_map(self, current_room, choice, player_location):
 		"""Initializes the current map layout with the player position and colliders
 		"""
 		layouts = {
@@ -61,13 +62,16 @@ class Room:
 						x = col_index * TILESIZE
 						y = row_index * TILESIZE
       
+					if 'room' in choice or 'both' in choice:
 						if type == current_room:
 							Tile((x,y), col, [self.obstacle_sprites], 'invisible')
-
+					
+					if 'player' in choice or 'both' in choice:
 						if type == 'player':
 							if col == IS_PLAYER:
 								self.player = Player(
 									(x,y),
+									player_location,
 									[self.visible_sprites],
 									self.obstacle_sprites,
          						)
@@ -77,13 +81,17 @@ class Room:
 		"""
 
 		prev_location = self.player.location
+		print("pre-set: ", self.player.get_location())
+
 		self.visible_sprites.set_room(self.player.get_location())
+		print("set: ", self.player.get_location())
 		current_room = 'collider_' + self.player.get_location()
   
 		self.obstacle_sprites.empty()
 		self.visible_sprites.empty()
+		self.create_map(current_room, 'both', self.player.get_location())
   
-		self.create_map(current_room)
+		print("after creation: ", self.player.get_location())
 		self.player.location = prev_location
 		current_room = 'collider_' + self.player.get_location()
 		
