@@ -1,4 +1,5 @@
 from inspect import CO_ASYNC_GENERATOR
+from re import X
 from secrets import choice
 from traceback import print_stack
 import pygame 
@@ -45,16 +46,18 @@ class Room:
 		# sprite group setup
 		self.visible_sprites = Camera()
 		self.obstacle_sprites = pygame.sprite.Group()
+		self.prev_room = Room_type.MOTHERBOARD.value
 		# sprite setup
-		self.create_map(Collider_type.MOTHERBOARD.value, 'both', 'motherboard')
+		self.create_map(Collider_type.MOTHERBOARD.value, 'both', 'motherboard', False, None)
 
-	def create_map(self, current_room, choice, player_location):
+	def create_map(self, current_room, choice, player_location, override_player_location, position):
 		"""Initializes the current map layout with the player position and colliders
 		"""
 		layouts = {
 			current_room : import_csv_layout('../assets/mapdata/' + current_room + '.csv'),
    			'player': import_csv_layout('../assets/mapdata/initial_position.csv'),
 		}
+		self.prev_room = current_room.replace('collider_', '')
 		for type, layout in layouts.items():
 			for row_index, row in enumerate(layout):
 				for col_index, col in enumerate(row):
@@ -69,54 +72,61 @@ class Room:
 					if 'player' in choice or 'both' in choice:
 						if type == 'player':
 							if col == IS_PLAYER:
-								self.player = Player(
-									(x,y),
-									player_location,
-									[self.visible_sprites],
-									self.obstacle_sprites,
-         						)
+								if not override_player_location:
+									self.player = Player(
+										(x,y),
+										player_location,
+										[self.visible_sprites],
+										self.obstacle_sprites,
+									)
+								elif override_player_location:
+									self.player = Player(
+										position,
+										player_location,
+										[self.visible_sprites],
+										self.obstacle_sprites,
+									)
 						        
 	def room_traversal(self):
 		"""Handles the room traversal
 		"""
-
-		prev_location = self.player.location
-		print("pre-set: ", self.player.get_location())
-
-		self.visible_sprites.set_room(self.player.get_location())
-		print("set: ", self.player.get_location())
-		current_room = 'collider_' + self.player.get_location()
-  
 		self.obstacle_sprites.empty()
 		self.visible_sprites.empty()
-		self.create_map(current_room, 'both', self.player.get_location())
-  
-		print("after creation: ", self.player.get_location())
-		self.player.location = prev_location
+		self.visible_sprites.set_room(self.player.get_location())
 		current_room = 'collider_' + self.player.get_location()
-		
-		location = self.player.get_location()
-  
-		# key_list = list(PATHS.keys())
-		# val_list = list(PATHS.values())
-
-		# index = val_list.index(DOORS[location])
 		 
-		# layouts = {
-		# 	current_room : import_csv_layout('../assets/mapdata/' + current_room + '.csv'),
-		# }
+		layouts = {
+			current_room : import_csv_layout('../assets/mapdata/' + current_room + '.csv'),
+		}
+		
+		x_pos = 0
+		y_pos = 0
+		middle = 2
+		door_opening = 0
+		for row_index, row in enumerate(layouts[current_room]):
+				for col_index, col in enumerate(row):
+					x = col_index * TILESIZE
+					y = row_index * TILESIZE
+					if col == DOORS[self.prev_room]:
+						door_opening += 1
+						if door_opening == middle:
+							x_pos = x	
+							y_pos = y	
 
-		# for row_index, row in enumerate(layouts[current_room]):
-		# 		for col_index, col in enumerate(row):
-		# 			x = col_index * TILESIZE
-		# 			y = row_index * TILESIZE
-		# 			if col == key_list[index]:
-		# 				print("found:",col , x, y)
-		# 				player_position = (x,y)
+		keys = pygame.key.get_pressed()
+  
+		if keys[pygame.K_w] or keys[pygame.K_UP]:
+			y_pos -= 75
+		elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+			y_pos += 75
+		elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+			x_pos -= 75
+		elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+			x_pos += 75
 
-       
-		# if self.player.get_location() == Collider_type.CPU.value:
-		# 	self.player.set_pos(player_position)
+		player_position = (x_pos,y_pos)
+   
+		self.create_map(current_room, 'both', self.player.get_location(), True, player_position)
 			
 		self.player.colliding = False
 		
