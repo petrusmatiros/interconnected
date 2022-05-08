@@ -77,7 +77,7 @@ class Player(Entity):
 		if keys[pygame.K_d] or keys[pygame.K_RIGHT]:
 			self.direction.x = 1
 			self.status = 'right'
-		elif keys[pygame.K_a] or keys[pygame.K_LEFT] :
+		elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
 			self.direction.x = -1
 			self.status = 'left'
 		else:
