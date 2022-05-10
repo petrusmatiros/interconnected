@@ -47,12 +47,15 @@ class Entity(pygame.sprite.Sprite):
 		"""Handles the player entering doors (traversal)
 		"""
 		for sprite in self.obstacle_sprites:
-			if sprite.id == DOORS['CPU'] and sprite.hitbox.colliderect(self.hitbox):
-				self.colliding = True
-				self.location = 'CPU'
-			elif sprite.id == DOORS['motherboard'] and sprite.hitbox.colliderect(self.hitbox):
+			if sprite.id == DOORS['motherboard'] and sprite.hitbox.colliderect(self.hitbox):
 				self.colliding = True
 				self.location = 'motherboard'
+			elif sprite.id == DOORS['CPU'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'CPU'
+			elif sprite.id == DOORS['DRAM'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'DRAM'
 			elif sprite.id == DOORS['L1'] and sprite.hitbox.colliderect(self.hitbox):
 				self.colliding = True
 				self.location = 'L1'
@@ -62,6 +65,12 @@ class Entity(pygame.sprite.Sprite):
 			elif sprite.id == DOORS['L3'] and sprite.hitbox.colliderect(self.hitbox):
 				self.colliding = True
 				self.location = 'L3'
+			elif sprite.id == DOORS['GPU'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'GPU'
+			elif sprite.id == DOORS['VRAM'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'VRAM'
 				
 
 
