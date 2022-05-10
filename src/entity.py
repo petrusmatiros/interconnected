@@ -53,6 +53,15 @@ class Entity(pygame.sprite.Sprite):
 			elif sprite.id == DOORS['motherboard'] and sprite.hitbox.colliderect(self.hitbox):
 				self.colliding = True
 				self.location = 'motherboard'
+			elif sprite.id == DOORS['L1'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'L1'
+			elif sprite.id == DOORS['L2'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'L2'
+			elif sprite.id == DOORS['L3'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'L3'
 				
 
 
