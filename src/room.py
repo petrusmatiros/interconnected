@@ -48,9 +48,9 @@ class Room:
 		self.obstacle_sprites = pygame.sprite.Group()
 		self.prev_room = Room_type.MOTHERBOARD.value
 		# sprite setup
-		self.create_map(Collider_type.MOTHERBOARD.value, 'both', 'motherboard', False, None)
+		self.create_map(Collider_type.MOTHERBOARD.value, 'both', 'motherboard', False, None, 'down')
 
-	def create_map(self, current_room, choice, player_location, override_player_location, position):
+	def create_map(self, current_room, choice, player_location, override_player_location, position, status):
 		"""Initializes the current map layout with the player position and colliders
 		"""
 		layouts = {
@@ -73,18 +73,20 @@ class Room:
 						if type == 'player':
 							if col == IS_PLAYER:
 								if not override_player_location:
-									self.player = Player(
-										(x,y),
-										player_location,
-										[self.visible_sprites],
-										self.obstacle_sprites,
-									)
+										self.player = Player(
+											(x,y),
+											player_location,
+											[self.visible_sprites],
+											self.obstacle_sprites,
+											status,
+										)
 								elif override_player_location:
 									self.player = Player(
 										position,
 										player_location,
 										[self.visible_sprites],
 										self.obstacle_sprites,
+										status,
 									)
 						        
 	def room_traversal(self):
@@ -120,13 +122,13 @@ class Room:
 		elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
 			y_pos += 75
 		elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-			x_pos -= 75
-		elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
 			x_pos += 75
+		elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+			x_pos -= 75
 
 		player_position = (x_pos,y_pos)
    
-		self.create_map(current_room, 'both', self.player.get_location(), True, player_position)
+		self.create_map(current_room, 'both', self.player.get_location(), True, player_position, self.player.status)
 			
 		self.player.colliding = False
 		

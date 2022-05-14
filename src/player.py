@@ -9,7 +9,7 @@ class Player(Entity):
 	Args:
 		Entity (Entity): entity object of class Entity
 	"""
-	def __init__(self, init_position, location, groups, obstacle_sprites):
+	def __init__(self, init_position, location, groups, obstacle_sprites, status):
 		"""Initializes the player object
 
 		Args:
@@ -20,13 +20,14 @@ class Player(Entity):
 		super().__init__(groups, location)
 		self.currentPosition = init_position
 		# display player and set it's hitbox
-		self.image = pygame.image.load('../assets/sprites/player/down/down_0.png').convert_alpha()
+
+		self.image = pygame.image.load('../assets/sprites/player/' + status +'/' + status + '_0.png').convert_alpha()
 		self.rect = self.image.get_rect(topleft = self.currentPosition)
 		self.hitbox = self.rect.inflate(0, HITBOX_OFFSET['player'])
 		
 		# graphics setup
 		self.import_player_assets()
-		self.status = 'down'
+		self.status = status
 		
 		# movement 
 		self.obstacle_sprites = obstacle_sprites
