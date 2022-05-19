@@ -7,6 +7,7 @@ from player import Player
 from key import Color
 from inventory import *
 from current import Current
+from dialogue import Dialogue
 
 class Room_type(Enum):
     POWERSUPPLY = 'power supply'
@@ -52,7 +53,12 @@ class Room:
 		self.inventory = Inventory()
 		# init current reference
 		self.current = Current()
+		# boolean to quit game
 		self.quit = False
+		# init dialogue
+		
+		self.dialogue = Dialogue(self.display_surface)
+		
 
 	def create_map(self, current_room, choice, player_location, override_player_location, position, status, draw_keys):
 		"""Initializes the current map layout with the player position and colliders
@@ -129,23 +135,18 @@ class Room:
 			if self.player.get_location() == 'L1' and self.current.L1_visited == False:
 				self.current.L1_visited = True
 				self.inventory.add_key(Color.RED)
-				print("add red key 1")
 			if self.player.get_location() == 'L2' and self.current.L2_visited == False:
 				self.current.L2_visited = True
 				self.inventory.add_key(Color.RED)
-				print("add red key 2")
 			if self.player.get_location() == 'L3' and self.current.L3_visited == False:
 				self.current.L3_visited = True
 				self.inventory.add_key(Color.RED)
-				print("add red key 3")
 
 		if self.inventory.get_amount(Color.PURPLE) < 1 and self.inventory.get_amount(Color.RED) == 3:
 			if self.player.get_location() == 'SSD' and self.current.SSD_visited == False and self.current.has_information == False:
 				self.current.SSD_visited = True
 				self.current.has_information = True
 				self.inventory.add_key(Color.PURPLE)
-				print("add purple key")
-				print("add information")
 
 	def check_endings(self):
 		"""Checks if the player has reached the end of the game and/or endings
@@ -153,25 +154,20 @@ class Room:
 		if self.player.get_location() == 'VRAM' and self.current.has_information == True and self.current.inserted_information == False:
 			self.current.inserted_information = True
 			self.player.colliding = False
-			print("insert information")
 		elif self.player.get_location() == 'internet' and self.inventory.get_amount(Color.PURPLE) == 1 and self.current.inserted_information == False:
 			self.current.internet_visited = True
 			self.player.colliding = False
-			print("normal ending")
 		elif self.player.get_location() == 'internet' and self.current.inserted_information == True:
 			self.current.internet_visited = True
 			self.player.location = 'Pill'
 			self.player.colliding = False
-			print("Pill ending")
 
     
 	def room_traversal(self):
 		"""Handles the room traversal
 		"""
-
-		self.check_visits()
 		
-		print(self.inventory.get_amount(Color.RED))
+		self.check_visits()
   
 		if self.inventory.get_amount(Color.RED) < 3 and self.player.get_location() == 'SSD':
 			self.player.location = 'motherboard'
@@ -183,10 +179,8 @@ class Room:
 			draw_keys = True
 			self.obstacle_sprites.empty()
 			self.visible_sprites.empty()
-			print(self.player.get_location())
 				
 			self.check_endings()
-			
 
 			self.visible_sprites.set_room(self.player.get_location())
 			current_room = 'collider_' + self.player.get_location()
@@ -228,25 +222,21 @@ class Room:
 				player_position = ending_position
 			else:
 				player_position = (x_pos,y_pos)
-   
-
 	
 			self.create_map(current_room, 'both', self.player.get_location(), True, player_position, self.player.status, draw_keys)
 				
 			self.player.colliding = False
+			
 		
 
 	def handle(self):
-		"""Handles the drawing of the player in the room
+		"""Handles the drawing of the player and text in the room
 		"""
 		self.visible_sprites.custom_draw(self.player)
 		self.visible_sprites.update()
 		if (self.player.colliding == True):
 			self.room_traversal()
-		if (self.current.red_key):
-			self.update_map()
-		elif (self.current.purple_key):
-			self.update_map()
+		self.dialogue.print_room(self.player.get_location())
 
 class Camera(pygame.sprite.Group):
 	"""Camera stores relevant data about the camera object

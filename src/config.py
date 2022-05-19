@@ -1,8 +1,12 @@
 
 # config constants
 WIDTH    = 960  	
-HEIGHT   = 800
+HEIGHT   = 750
+MAP_WIDTH = WIDTH
+MAP_HEIGHT = 640
 FPS      = 60
+TXT_X    = MAP_WIDTH/2
+TXT_Y    = MAP_HEIGHT + 50
 TILESIZE = 32
 HITBOX_OFFSET = {
 	'player': 0,
