@@ -1,13 +1,12 @@
-from inspect import CO_ASYNC_GENERATOR
-from re import X
-from secrets import choice
-from traceback import print_stack
 import pygame 
 from config import *
 from tile import Tile
 from csv_handler import *
 from enum import Enum
 from player import Player
+from key import Color
+from inventory import *
+from current import Current
 
 class Room_type(Enum):
     POWERSUPPLY = 'power supply'
@@ -48,9 +47,14 @@ class Room:
 		self.obstacle_sprites = pygame.sprite.Group()
 		self.prev_room = Room_type.MOTHERBOARD.value
 		# sprite setup
-		self.create_map(Collider_type.MOTHERBOARD.value, 'both', 'motherboard', False, None, 'down')
+		self.create_map(Collider_type.MOTHERBOARD.value, 'both', 'motherboard', False, None, 'down', True)
+		# init player inventory
+		self.inventory = Inventory()
+		# init current reference
+		self.current = Current()
+		self.quit = False
 
-	def create_map(self, current_room, choice, player_location, override_player_location, position, status):
+	def create_map(self, current_room, choice, player_location, override_player_location, position, status, draw_keys):
 		"""Initializes the current map layout with the player position and colliders
 		"""
 		layouts = {
@@ -67,6 +71,11 @@ class Room:
       
 					if 'room' in choice or 'both' in choice:
 						if type == current_room:
+							# if col == KEYS["RED"] or col == KEYS["PURPLE"]:
+								# # if draw_keys:
+								# # TODO: draw key tile with hitbox, overlaying map, then remove it, and let air be left (air in csv, -1 in map)
+								# 	Tile((x,y), col, [self.obstacle_sprites], 'key')
+							# else:
 							Tile((x,y), col, [self.obstacle_sprites], 'invisible')
 					
 					if 'player' in choice or 'both' in choice:
@@ -88,49 +97,143 @@ class Room:
 										self.obstacle_sprites,
 										status,
 									)
-						        
+	
+ 
+	# def update_map(self):
+	# 	"""Handles updates of the map when keys are picked up
+	# 	"""
+	# 	# self.obstacle_sprites.empty()
+	# 	# self.visible_sprites.empty()
+	# 	current_room = 'collider_' + self.player.get_location()
+	# 	x = self.player.rect.centerx
+	# 	y = self.player.rect.centery
+	# 	player_position = (x,y)
+	# 	draw_keys = False
+	# 	# self.create_map(current_room, 'both', self.player.get_location(), True, player_position, self.player.status, draw_keys)
+  
+	# 	if (self.player.current.red_key):
+	# 		self.player.current.red_key = False
+	# 		self.inventory.add_key(Color.RED)
+	# 	elif (self.player.current.purple_key):
+	# 		self.player.current.purple_key = False
+	# 		self.inventory.add_key(Color.PURPLE)
+	# 	self.obstacle_sprites.remove(self.player.current_sprite)
+	# 	print(self.inventory.get_amount(Color.RED))
+	# 	# pygame.sprite.Sprite.remove(self.player.current_sprite)
+  
+	def check_visits(self):
+		"""Checks if the player has visited a room
+		"""
+		if self.inventory.get_amount(Color.RED) < 3:
+			
+			if self.player.get_location() == 'L1' and self.current.L1_visited == False:
+				self.current.L1_visited = True
+				self.inventory.add_key(Color.RED)
+				print("add red key 1")
+			if self.player.get_location() == 'L2' and self.current.L2_visited == False:
+				self.current.L2_visited = True
+				self.inventory.add_key(Color.RED)
+				print("add red key 2")
+			if self.player.get_location() == 'L3' and self.current.L3_visited == False:
+				self.current.L3_visited = True
+				self.inventory.add_key(Color.RED)
+				print("add red key 3")
+
+		if self.inventory.get_amount(Color.PURPLE) < 1 and self.inventory.get_amount(Color.RED) == 3:
+			if self.player.get_location() == 'SSD' and self.current.SSD_visited == False and self.current.has_information == False:
+				self.current.SSD_visited = True
+				self.current.has_information = True
+				self.inventory.add_key(Color.PURPLE)
+				print("add purple key")
+				print("add information")
+
+	def check_endings(self):
+		"""Checks if the player has reached the end of the game and/or endings
+		"""
+		if self.player.get_location() == 'VRAM' and self.current.has_information == True and self.current.inserted_information == False:
+			self.current.inserted_information = True
+			self.player.colliding = False
+			print("insert information")
+		elif self.player.get_location() == 'internet' and self.inventory.get_amount(Color.PURPLE) == 1 and self.current.inserted_information == False:
+			self.current.internet_visited = True
+			self.player.colliding = False
+			print("normal ending")
+		elif self.player.get_location() == 'internet' and self.current.inserted_information == True:
+			self.current.internet_visited = True
+			self.player.location = 'Pill'
+			self.player.colliding = False
+			print("Pill ending")
+
+    
 	def room_traversal(self):
 		"""Handles the room traversal
 		"""
-		self.obstacle_sprites.empty()
-		self.visible_sprites.empty()
-		self.visible_sprites.set_room(self.player.get_location())
-		current_room = 'collider_' + self.player.get_location()
-		 
-		layouts = {
-			current_room : import_csv_layout('../assets/mapdata/' + current_room + '.csv'),
-		}
+
+		self.check_visits()
 		
-		x_pos = 0
-		y_pos = 0
-		middle = 2
-		door_opening = 0
-		for row_index, row in enumerate(layouts[current_room]):
-				for col_index, col in enumerate(row):
-					x = col_index * TILESIZE
-					y = row_index * TILESIZE
-					if col == DOORS[self.prev_room]:
-						door_opening += 1
-						if door_opening == middle:
-							x_pos = x	
-							y_pos = y	
-
-		keys = pygame.key.get_pressed()
+		print(self.inventory.get_amount(Color.RED))
   
-		if keys[pygame.K_w] or keys[pygame.K_UP]:
-			y_pos -= 75
-		elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
-			y_pos += 75
-		elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
-			x_pos += 75
-		elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
-			x_pos -= 75
-
-		player_position = (x_pos,y_pos)
-   
-		self.create_map(current_room, 'both', self.player.get_location(), True, player_position, self.player.status)
+		if self.inventory.get_amount(Color.RED) < 3 and self.player.get_location() == 'SSD':
+			self.player.location = 'motherboard'
+			self.player.colliding = False
+		elif self.inventory.get_amount(Color.PURPLE) < 1 and self.player.get_location() == 'internet':
+			self.player.location = 'motherboard'
+			self.player.colliding = False
+		else:
+			draw_keys = True
+			self.obstacle_sprites.empty()
+			self.visible_sprites.empty()
+			print(self.player.get_location())
+				
+			self.check_endings()
 			
-		self.player.colliding = False
+
+			self.visible_sprites.set_room(self.player.get_location())
+			current_room = 'collider_' + self.player.get_location()
+
+			layouts = {
+				current_room : import_csv_layout('../assets/mapdata/' + current_room + '.csv'),
+			}
+			
+			x_pos = 0
+			y_pos = 0
+			middle = 2
+			door_opening = 0
+			for row_index, row in enumerate(layouts[current_room]):
+					for col_index, col in enumerate(row):
+						x = col_index * TILESIZE
+						y = row_index * TILESIZE
+						if col == DOORS[self.prev_room]:
+							door_opening += 1
+							if door_opening == middle:
+								x_pos = x	
+								y_pos = y	
+
+			keys = pygame.key.get_pressed()
+	
+			if keys[pygame.K_w] or keys[pygame.K_UP]:
+				y_pos -= 75
+			elif keys[pygame.K_s] or keys[pygame.K_DOWN]:
+				y_pos += 75
+			elif keys[pygame.K_d] or keys[pygame.K_RIGHT]:
+				x_pos += 75
+			elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
+				x_pos -= 75
+
+			ending_position = (WIDTH/2,300)
+   
+			if self.current.internet_visited and self.current.inserted_information == False:
+				player_position = ending_position
+			elif self.current.internet_visited and self.current.inserted_information == True:
+				player_position = ending_position
+			else:
+				player_position = (x_pos,y_pos)
+   
+
+	
+			self.create_map(current_room, 'both', self.player.get_location(), True, player_position, self.player.status, draw_keys)
+				
+			self.player.colliding = False
 		
 
 	def handle(self):
@@ -140,6 +243,10 @@ class Room:
 		self.visible_sprites.update()
 		if (self.player.colliding == True):
 			self.room_traversal()
+		if (self.current.red_key):
+			self.update_map()
+		elif (self.current.purple_key):
+			self.update_map()
 
 class Camera(pygame.sprite.Group):
 	"""Camera stores relevant data about the camera object
@@ -155,9 +262,9 @@ class Camera(pygame.sprite.Group):
   
 		# setup
 		self.display_surface = pygame.display.get_surface()
-		self.half_width = self.display_surface.get_size()[0] // 2
-		self.half_height = self.display_surface.get_size()[1] // 2
-		self.offset = pygame.math.Vector2()
+		# self.half_width = self.display_surface.get_size()[0] // 2
+		# self.half_height = self.display_surface.get_size()[1] // 2
+		# self.offset = pygame.math.Vector2()
 
 		# set the path to the current room
 		room_path = '../assets/rooms/' + Room_type.MOTHERBOARD.value + '.png'
@@ -177,16 +284,18 @@ class Camera(pygame.sprite.Group):
 	def custom_draw(self,player):
 		"""Draws the player with the moving camera
   		"""
-		# set offsets 
-		self.offset.x = player.rect.centerx - self.half_width
-		self.offset.y = player.rect.centery - self.half_height
+		# # set offsets 
+		# self.offset.x = player.rect.centerx - self.half_width
+		# self.offset.y = player.rect.centery - self.half_height
 
 		# draw floor
-		floor_offset_pos = self.floor_rect.topleft - self.offset
+		# floor_offset_pos = self.floor_rect.topleft - self.offset
+		floor_offset_pos = self.floor_rect.topleft
 		self.display_surface.blit(self.floor_surf,(floor_offset_pos))
 
 		# display with given offset
 		for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
-			offset_pos = sprite.rect.topleft - self.offset
+			# offset_pos = sprite.rect.topleft - self.offset
+			offset_pos = sprite.rect.topleft
 			self.display_surface.blit(sprite.image, offset_pos)
         
