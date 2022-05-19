@@ -1,6 +1,7 @@
 import pygame
 from math import sin
 from room import *
+from current import Current
 
 class Entity(pygame.sprite.Sprite):
 	"""
@@ -41,6 +42,8 @@ class Entity(pygame.sprite.Sprite):
 		self.hitbox.y += self.direction.y * speed
 		self.collision_handler('vertical')
 		self.rect.center = self.hitbox.center
+		
+
 
 
 	def door_handler(self):
@@ -71,7 +74,34 @@ class Entity(pygame.sprite.Sprite):
 			elif sprite.id == DOORS['VRAM'] and sprite.hitbox.colliderect(self.hitbox):
 				self.colliding = True
 				self.location = 'VRAM'
-				
+			elif sprite.id == DOORS['SSD'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'SSD'
+			elif sprite.id == DOORS['internet'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'internet'
+			elif sprite.id == DOORS['Pill'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'Pill'
+			elif sprite.id == DOORS['Blue_Pill'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'Blue_Pill'
+			elif sprite.id == DOORS['Red_Pill'] and sprite.hitbox.colliderect(self.hitbox):
+				self.colliding = True
+				self.location = 'Red_Pill'
+    
+	# # TODO: FIX THIS			
+	# def key_handler(self, current):
+	# 	"""Handles the player picking up keys
+	# 	"""
+	# 	for sprite in self.obstacle_sprites:
+	# 		if sprite.id == KEYS['RED'] and sprite.hitbox.colliderect(self.hitbox):
+	# 			self.current.red_key = True
+	# 			self.current_sprite = sprite
+
+	# 		elif sprite.id == KEYS['PURPLE'] and sprite.hitbox.colliderect(self.hitbox):
+	# 			self.current.purple_key = True
+	# 			self.current_sprite = sprite
 
 
 	def collision_handler(self, direction):
@@ -80,7 +110,9 @@ class Entity(pygame.sprite.Sprite):
 		Args:
 			direction (vector2): the direction of the player
 		"""
+		
 		self.door_handler()
+		# self.key_handler(self.current)
 		if direction == 'horizontal':
 			for sprite in self.obstacle_sprites:
 				# if the player is colliding with an obstacle

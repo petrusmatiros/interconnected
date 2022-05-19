@@ -1,6 +1,7 @@
 import pygame, sys
 from config import *
 from room import *
+from current import *
 
 class Game:
 	"""Game initialises the game and runs the main game loop
@@ -16,11 +17,13 @@ class Game:
 
 		# init room
 		self.room = Room()
+		self.running = True
+
 	
 	def run(self):
 		"""Runs the main game loop
 		"""
-		while True:
+		while self.running:
 			for event in pygame.event.get():
 				if event.type == pygame.QUIT:
 					pygame.quit()
