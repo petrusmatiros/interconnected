@@ -32,6 +32,13 @@ class Dialogue():
         if (keys[pygame.K_e]):
             self.print_info(location)
         
+    # TODO:
+    # Add function comments
+    # Use self.quit from room at endings
+    # Add room info
+    # Make it so you print text slower when viewing room info
+    # Add VRAM information text
+    # Add endings text
     def print_txt(self, text, x, y):
         self.text = self.font.render(text, True, (255,255,255))
         self.textRect = self.text.get_rect()
