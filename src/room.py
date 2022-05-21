@@ -8,6 +8,7 @@ from key import Color
 from inventory import *
 from current import Current
 from dialogue import Dialogue
+import time
 
 class Room_type(Enum):
     POWERSUPPLY = 'power supply'
@@ -56,6 +57,7 @@ class Room:
 		# boolean to quit game
 		self.quit = False
 		# init dialogue
+		self.win = False
 		
 		self.dialogue = Dialogue(self.display_surface)
 		
@@ -135,13 +137,13 @@ class Room:
 			if self.player.get_location() == 'L1' and self.current.L1_visited == False:
 				self.current.L1_visited = True
 				self.inventory.add_key(Color.RED)
+				
 			if self.player.get_location() == 'L2' and self.current.L2_visited == False:
 				self.current.L2_visited = True
 				self.inventory.add_key(Color.RED)
 			if self.player.get_location() == 'L3' and self.current.L3_visited == False:
 				self.current.L3_visited = True
 				self.inventory.add_key(Color.RED)
-
 		if self.inventory.get_amount(Color.PURPLE) < 1 and self.inventory.get_amount(Color.RED) == 3:
 			if self.player.get_location() == 'SSD' and self.current.SSD_visited == False and self.current.has_information == False:
 				self.current.SSD_visited = True
@@ -166,13 +168,16 @@ class Room:
 	def room_traversal(self):
 		"""Handles the room traversal
 		"""
-		
 		self.check_visits()
   
 		if self.inventory.get_amount(Color.RED) < 3 and self.player.get_location() == 'SSD':
+			self.dialogue.check_access(self.player.get_location())
+			time.sleep(2.5)
 			self.player.location = 'motherboard'
 			self.player.colliding = False
 		elif self.inventory.get_amount(Color.PURPLE) < 1 and self.player.get_location() == 'internet':
+			self.dialogue.check_access(self.player.get_location())
+			time.sleep(2.5)
 			self.player.location = 'motherboard'
 			self.player.colliding = False
 		else:
@@ -214,12 +219,14 @@ class Room:
 			elif keys[pygame.K_a] or keys[pygame.K_LEFT]:
 				x_pos -= 75
 
-			ending_position = (WIDTH/2,300)
+			ending_position = (WIDTH/2, 300)
    
 			if self.current.internet_visited and self.current.inserted_information == False:
 				player_position = ending_position
+				self.win = True
 			elif self.current.internet_visited and self.current.inserted_information == True:
 				player_position = ending_position
+				self.win = True
 			else:
 				player_position = (x_pos,y_pos)
 	
@@ -227,16 +234,35 @@ class Room:
 				
 			self.player.colliding = False
 			
-		
+	def print_world_events(self, player, current, dialogue):
+		if player.get_location() == 'internet' and current.inserted_information == False:
+				dialogue.win_normal()
+				time.sleep(5)
+		elif player.get_location() == 'Pill' and current.inserted_information == True:
+				dialogue.pill()
+				time.sleep(5)
+		elif player.get_location() == 'Blue_Pill' and current.inserted_information == True:
+				dialogue.win_blue()
+				time.sleep(5)
+		elif player.get_location() == 'Red_Pill' and current.inserted_information == True:
+				dialogue.win_red()
+				time.sleep(5)
+		self.win = False
+
 
 	def handle(self):
 		"""Handles the drawing of the player and text in the room
 		"""
 		self.visible_sprites.custom_draw(self.player)
 		self.visible_sprites.update()
+		if (self.win):
+			self.print_world_events(self.player, self.current, self.dialogue)
+		self.dialogue.print_inventory(self.inventory)
 		if (self.player.colliding == True):
 			self.room_traversal()
 		self.dialogue.print_room(self.player.get_location())
+		
+		pygame.display.update()
 
 class Camera(pygame.sprite.Group):
 	"""Camera stores relevant data about the camera object
